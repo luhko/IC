@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg text-ink;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: rgba(77, 208, 167, 0.3);
+  }
+}
+
+@layer utilities {
+  .scroll-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #2a3140 transparent;
+  }
+  .scroll-thin::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: #2a3140;
+    border-radius: 999px;
+    border: 2px solid #0d1117;
+  }
+}
+
+/* --- Markdown prose --- */
+.prose-ic {
+  @apply text-ink leading-relaxed;
+}
+.prose-ic h1 {
+  @apply text-2xl font-semibold mt-2 mb-4 text-ink;
+}
+.prose-ic h2 {
+  @apply text-xl font-semibold mt-8 mb-3 pb-1 border-b border-edge text-ink;
+}
+.prose-ic h3 {
+  @apply text-lg font-semibold mt-6 mb-2 text-ink;
+}
+.prose-ic h4 {
+  @apply text-base font-semibold mt-4 mb-1 text-ink-dim uppercase tracking-wide;
+}
+.prose-ic p {
+  @apply my-3;
+}
+.prose-ic ul {
+  @apply list-disc pl-6 my-3 space-y-1;
+}
+.prose-ic ol {
+  @apply list-decimal pl-6 my-3 space-y-1;
+}
+.prose-ic a {
+  @apply text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent;
+}
+.prose-ic strong {
+  @apply text-ink font-semibold;
+}
+.prose-ic blockquote {
+  @apply border-l-2 border-accent/50 pl-4 my-4 text-ink-dim italic;
+}
+.prose-ic table {
+  @apply w-full my-4 text-sm border-collapse;
+}
+.prose-ic th {
+  @apply text-left font-semibold px-3 py-2 border-b border-edge text-ink-dim;
+}
+.prose-ic td {
+  @apply px-3 py-2 border-b border-edge/60 align-top;
+}
+.prose-ic code:not(pre code) {
+  @apply font-mono text-[0.85em] px-1.5 py-0.5 rounded bg-bg-softer text-accent;
+}
+.prose-ic hr {
+  @apply my-6 border-edge;
+}
+
+/* markmap fills its container + reads on dark */
+.markmap-root {
+  color: #e6edf3;
+}
+.markmap-root svg {
+  width: 100%;
+  height: 100%;
+}
+.markmap-foreign,
+.markmap-foreign div {
+  color: #e6edf3;
+}
+.markmap-foreign a {
+  color: #4dd0a7;
+}
+.markmap-foreign code {
+  background: #1c2230;
+  border-radius: 4px;
+  padding: 0 3px;
+}

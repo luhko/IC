@@ -1,0 +1,23 @@
+# Canonical variables — surfaced in the Context panel + used for substitution.
+# Any $name in a command block is replaced live from these values.
+variables:
+  - { name: ip,          label: Target IP,              example: 10.10.10.20,          group: Target }
+  - { name: target,      label: Target host / FQDN,     example: srv01.corp.local,     group: Target }
+  - { name: dc_ip,       label: Domain Controller IP,   example: 10.10.10.10,          group: Target }
+  - { name: dc_host,     label: DC hostname / FQDN,     example: dc01.corp.local,      group: Target }
+  - { name: computer,    label: Machine account,        example: SRV01$,               group: Target }
+
+  - { name: domain,      label: AD domain (FQDN),       example: corp.local,           group: Identity }
+  - { name: domain_nb,   label: NetBIOS domain,         example: CORP,                 group: Identity }
+  - { name: user,        label: Username,               example: jdoe,                 group: Identity }
+  - { name: password,    label: Password,               example: "Winter2026!",        group: Identity }
+  - { name: nthash,      label: NT hash,                example: 31d6cfe0d16ae931b73c59d7e0c089c0, group: Identity }
+  - { name: aeskey,      label: Kerberos AES256 key,    example: "",                   group: Identity }
+  - { name: base_dn,     label: LDAP base DN,           example: "DC=corp,DC=local",   group: Identity }
+
+  - { name: attacker_ip, label: Your IP (relay/coerce), example: 10.10.14.5,           group: Attacker }
+  - { name: interface,   label: Your interface,         example: tun0,                 group: Attacker }
+
+  - { name: target_user, label: Target principal,       example: administrator,        group: Objective }
+  - { name: target_computer, label: Target computer,    example: SRV02$,               group: Objective }
+  - { name: spn,         label: Service Principal Name, example: cifs/srv01.corp.local, group: Objective }

