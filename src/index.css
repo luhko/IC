@@ -98,12 +98,22 @@
 .markmap-foreign,
 .markmap-foreign div {
   color: #e6edf3;
+  font-size: 14px;
+  line-height: 1.35;
+}
+/* top-level branch labels a touch bigger/bolder */
+.markmap-foreign strong {
+  font-weight: 600;
+  color: #f2f6fb;
 }
 .markmap-foreign a {
   color: #4dd0a7;
 }
 .markmap-foreign code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86em;
   background: #1c2230;
+  color: #4dd0a7;
   border-radius: 4px;
-  padding: 0 3px;
+  padding: 0 4px;
 }
