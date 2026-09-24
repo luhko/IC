@@ -119,10 +119,8 @@ This is the config-side cousin of **Golden SAML** — no cert theft, just a mali
 
 A cloud admin with **Global Admin / Intune Administrator** can push **PowerShell scripts, Win32 apps, or remediation scripts** through the **Intune Management Extension**, which runs them as **SYSTEM** on every Entra-joined and **hybrid-joined** device — including privileged workstations. A hybrid-joined foothold then executes in the on-prem domain context, bridging cloud compromise back down to AD.
 
-```text
-Global/Intune Admin  ->  assign PowerShell script (runs as SYSTEM)
-                     ->  Intune Management Extension on managed devices
-                     ->  code exec on hybrid-joined endpoints  ->  on-prem domain foothold
-```
+> **Chain:** Global/Intune Admin → assign a PowerShell script (runs as SYSTEM) →
+> Intune Management Extension on managed devices → code exec on hybrid-joined
+> endpoints → on-prem domain foothold.
 
 Scripts leave minimal forensic trace by default and reach many endpoints at once, which is why script/app authoring should be least-privileged and admin devices should not share the Intune tenant that manages standard fleet endpoints.

@@ -27,15 +27,29 @@ Vite + React + TypeScript, Tailwind, zustand, react-markdown, markmap, Fuse.js.
 
 ## Run
 
+Easiest — the launcher installs deps if needed, builds prod, and serves it:
+
 ```bash
-npm install
-npm run dev      # http://localhost:5173
+./launch.sh              # http://localhost:5173
+./launch.sh --dev        # dev server with hot reload
+PORT=8080 ./launch.sh    # different port
 ```
 
-Build a static bundle you can open anywhere:
+Or with npm directly (production — minified static bundle):
 
 ```bash
-npm run build && npm run preview
+npm install
+npm start        # build + serve prod on http://localhost:5173
+```
+
+`npm start` runs `npm run build` (typecheck + minified bundle into `dist/`) then
+serves it with `vite preview`. `dist/` is a plain static site — you can also host
+it with any static server (`npx serve dist`, nginx, GitHub Pages…).
+
+Development (hot reload, unminified) — only while editing the app:
+
+```bash
+npm run dev      # http://localhost:5173
 ```
 
 ## Content
