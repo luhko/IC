@@ -43,6 +43,24 @@ function CopyButton({ text, label = 'copy' }: { text: string; label?: string }) 
   )
 }
 
+// Split an unquoted shell comment (inline or full-line) off a command line.
+// The command part is what we copy; the comment stays visible but dimmed.
+function splitComment(line: string): { code: string; comment: string } {
+  let inS = false
+  let inD = false
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i]
+    if (c === "'" && !inD) inS = !inS
+    else if (c === '"' && !inS) inD = !inD
+    else if (c === '#' && !inS && !inD && (i === 0 || /\s/.test(line[i - 1])))
+      return {
+        code: line.slice(0, i).replace(/\s+$/, ''),
+        comment: line.slice(i),
+      }
+  }
+  return { code: line, comment: '' }
+}
+
 function Tokens({ cmd }: { cmd: string }) {
   const values = useVars((s) => s.values)
   const tokens = tokenize(cmd, values)
@@ -92,32 +110,45 @@ function CommandLine({ cmd }: { cmd: string }) {
 export function CommandBlock({ code, lang }: { code: string; lang?: string }) {
   const values = useVars((s) => s.values)
   const lines = code.split('\n')
-  const allResolved = substitute(code, values)
+
+  // Comments live below the block as a note; the terminal card is pure commands.
+  const notes: string[] = []
+  for (const line of lines) {
+    const { comment } = splitComment(line)
+    if (comment) notes.push(comment.replace(/^\s*#+\s?/, ''))
+  }
+  const cleanBlock = lines
+    .map((l) => splitComment(l).code)
+    .filter((l) => l.trim() !== '')
+    .map((l) => substitute(l, values))
+    .join('\n')
+
   return (
-    <div className="my-4 overflow-hidden rounded-lg border border-edge bg-bg-softer">
-      <div className="flex items-center justify-between border-b border-edge/70 bg-black/20 px-3 py-1">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">
-          {lang || 'sh'}
-        </span>
-        <CopyButton text={allResolved} label="copy block" />
+    <div className="my-4">
+      <div className="overflow-hidden rounded-lg border border-edge bg-bg-softer">
+        <div className="flex items-center justify-between border-b border-edge/70 bg-black/20 px-3 py-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-ink-faint">
+            {lang || 'sh'}
+          </span>
+          <CopyButton text={cleanBlock} label="copy block" />
+        </div>
+        <div className="scroll-thin overflow-x-auto py-1.5">
+          {lines.map((line, i) => {
+            const { code: c } = splitComment(line)
+            if (line.trim() === '')
+              return <div key={i} className="h-2" aria-hidden />
+            if (c.trim() === '') return null
+            return <CommandLine key={i} cmd={c} />
+          })}
+        </div>
       </div>
-      <div className="scroll-thin overflow-x-auto py-1.5">
-        {lines.map((line, i) => {
-          const trimmed = line.trim()
-          if (trimmed === '')
-            return <div key={i} className="h-2" aria-hidden />
-          if (trimmed.startsWith('#'))
-            return (
-              <div
-                key={i}
-                className="px-3 py-0.5 font-mono text-[12px] italic text-ink-faint"
-              >
-                {line}
-              </div>
-            )
-          return <CommandLine key={i} cmd={line} />
-        })}
-      </div>
+      {notes.length > 0 && (
+        <div className="mt-1.5 border-l-2 border-edge pl-3 text-[12px] italic leading-relaxed text-ink-faint">
+          {notes.map((n, i) => (
+            <div key={i}>{n}</div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
