@@ -92,16 +92,22 @@ function Tokens({ cmd }: { cmd: string }) {
   )
 }
 
-function CommandLine({ cmd }: { cmd: string }) {
+// A single logical command — may span several physical lines via `\`
+// continuations. Rendered with one prompt and one copy button.
+function CommandLine({ lines }: { lines: string[] }) {
   const values = useVars((s) => s.values)
   return (
     <div className="group/line flex items-start gap-2 px-3 py-0.5 hover:bg-white/5">
-      <span className="select-none text-accent/70">$</span>
+      <span className="select-none pt-px text-accent/70">$</span>
       <code className="flex-1 whitespace-pre-wrap break-words font-mono text-[13px] leading-relaxed">
-        <Tokens cmd={cmd} />
+        {lines.map((l, i) => (
+          <span key={i} className="block">
+            <Tokens cmd={l} />
+          </span>
+        ))}
       </code>
       <span className="opacity-0 group-hover/line:opacity-100 transition-opacity">
-        <CopyButton text={substitute(cmd, values)} />
+        <CopyButton text={substitute(lines.join('\n'), values)} />
       </span>
     </div>
   )
@@ -111,16 +117,33 @@ export function CommandBlock({ code, lang }: { code: string; lang?: string }) {
   const values = useVars((s) => s.values)
   const lines = code.split('\n')
 
-  // Comments live below the block as a note; the terminal card is pure commands.
+  // Build the render list: comments go to a note below; consecutive physical
+  // lines joined by a trailing `\` become one logical command.
   const notes: string[] = []
-  for (const line of lines) {
-    const { comment } = splitComment(line)
-    if (comment) notes.push(comment.replace(/^\s*#+\s?/, ''))
+  const render: ({ kind: 'spacer' } | { kind: 'cmd'; lines: string[] })[] = []
+  let pending: string[] = []
+  const flush = () => {
+    if (pending.length) {
+      render.push({ kind: 'cmd', lines: pending })
+      pending = []
+    }
   }
-  const cleanBlock = lines
-    .map((l) => splitComment(l).code)
-    .filter((l) => l.trim() !== '')
-    .map((l) => substitute(l, values))
+  for (const raw of lines) {
+    const { code: c, comment } = splitComment(raw)
+    if (comment) notes.push(comment.replace(/^\s*#+\s?/, ''))
+    if (raw.trim() === '') {
+      flush()
+      render.push({ kind: 'spacer' })
+      continue
+    }
+    if (c.trim() === '') continue // pure comment line — already captured
+    pending.push(c)
+    if (!/\\\s*$/.test(c)) flush()
+  }
+  flush()
+
+  const cleanBlock = render
+    .flatMap((r) => (r.kind === 'cmd' ? [substitute(r.lines.join('\n'), values)] : []))
     .join('\n')
 
   return (
@@ -133,13 +156,13 @@ export function CommandBlock({ code, lang }: { code: string; lang?: string }) {
           <CopyButton text={cleanBlock} label="copy block" />
         </div>
         <div className="scroll-thin overflow-x-auto py-1.5">
-          {lines.map((line, i) => {
-            const { code: c } = splitComment(line)
-            if (line.trim() === '')
-              return <div key={i} className="h-2" aria-hidden />
-            if (c.trim() === '') return null
-            return <CommandLine key={i} cmd={c} />
-          })}
+          {render.map((r, i) =>
+            r.kind === 'spacer' ? (
+              <div key={i} className="h-2" aria-hidden />
+            ) : (
+              <CommandLine key={i} lines={r.lines} />
+            ),
+          )}
         </div>
       </div>
       {notes.length > 0 && (
