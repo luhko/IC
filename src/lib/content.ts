@@ -71,10 +71,13 @@ const CATEGORY_ORDER = [
   'AD / ADCS',
   'AD / Delegation',
   'AD / ACL abuse',
+  'AD / GPO',
   'AD / Lateral Movement',
   'AD / Domain Privesc',
   'AD / Persistence',
+  'AD / Trusts',
   'AD / Windows tooling',
+  'AD / Entra ID',
   'AD / CVE',
 ]
 function catWeight(c: string): number {

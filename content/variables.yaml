@@ -26,3 +26,6 @@ variables:
   - { name: ca_host,     label: CA host (FQDN),         example: ca01.corp.local,      group: ADCS }
   - { name: template,    label: Certificate template,   example: User,                 group: ADCS }
   - { name: domain_sid,  label: Domain SID,             example: S-1-5-21-1004336348-1177238915-682003330, group: ADCS }
+
+  - { name: tenant,      label: Entra tenant domain,    example: corp.onmicrosoft.com, group: Entra }
+  - { name: upn,         label: User principal name,    example: jdoe@corp.com,        group: Entra }
