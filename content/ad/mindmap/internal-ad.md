@@ -70,6 +70,8 @@ title: Internal AD methodology
 - WinRM — evil-winrm
 - DCOM / MMC20
 - RDP — restricted admin, pass-the-hash
+- MSSQL — impersonation, linked servers, xp_cmdshell
+- SCCM — NAA/PXE creds, client-push relay, site takeover
 
 ## Domain dominance
 ### Get to DA / Enterprise Admin
@@ -79,6 +81,19 @@ title: Internal AD methodology
 - Golden / Silver / Diamond / Sapphire ticket
 - DSRM, AdminSDHolder, GPO, ACL backdoor
 - Skeleton key, certificate (THEFT/persistence)
+
+## Hybrid & Entra ID
+### Recon
+- Unauth — tenant discovery, user enum (o365spray, AADInternals)
+- Authed — ROADtools, AzureHound, msol / Graph
+### Attacks
+- Password spray, device-code phishing, consent grant
+- Token / PRT theft & replay
+### Hybrid pivots
+- Entra Connect server = Tier-0; MSOL_ DCSync
+- Golden SAML (ADFS token-signing cert)
+- Seamless SSO — AZUREADSSOACC$ silver ticket
+- Intune — cloud admin → SYSTEM on managed devices
 
 ## Post
 - Loot: shares, DBs, code, secrets
