@@ -1,9 +1,44 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { navGroups, attackPaths, searchable } from '../lib/content'
 import { docHref } from '../lib/nav'
 import { StatusControl, StatusDot } from '../components/Status'
 import { useChecklist, DEFAULT_ITEM } from '../store/checklist'
+import { useVars } from '../store/vars'
+
+function exportState() {
+  const data = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    variables: useVars.getState().values,
+    checklist: useChecklist.getState().items,
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: 'application/json',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `ic-engagement-${Date.now()}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function importState(file: File) {
+  const reader = new FileReader()
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(String(reader.result))
+      if (data.variables && typeof data.variables === 'object')
+        useVars.setState({ values: data.variables })
+      if (data.checklist && typeof data.checklist === 'object')
+        useChecklist.setState({ items: data.checklist })
+    } catch {
+      alert('Invalid engagement file.')
+    }
+  }
+  reader.readAsText(file)
+}
 
 type Filter =
   | 'all'
@@ -28,6 +63,7 @@ export function ChecklistPage() {
   const items = useChecklist((s) => s.items)
   const clearAll = useChecklist((s) => s.clearAll)
   const [filter, setFilter] = useState<Filter>('all')
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const groups = useMemo(
     () => [...navGroups, { name: 'AD / Attack paths', docs: attackPaths }],
@@ -65,14 +101,41 @@ export function ChecklistPage() {
       <div className="mx-auto max-w-3xl px-8 py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold text-ink">Checklist</h1>
-          <button
-            onClick={() => {
-              if (confirm('Clear all test statuses and notes?')) clearAll()
-            }}
-            className="rounded border border-edge px-3 py-1.5 text-[12px] text-ink-faint hover:border-danger/60 hover:text-danger"
-          >
-            clear all
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportState}
+              className="rounded border border-edge px-3 py-1.5 text-[12px] text-ink-faint hover:border-accent/60 hover:text-accent"
+              title="Download variables + checklist as JSON"
+            >
+              export
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="rounded border border-edge px-3 py-1.5 text-[12px] text-ink-faint hover:border-accent/60 hover:text-accent"
+              title="Load an engagement JSON"
+            >
+              import
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) importState(f)
+                e.target.value = ''
+              }}
+            />
+            <button
+              onClick={() => {
+                if (confirm('Clear all test statuses and notes?')) clearAll()
+              }}
+              className="rounded border border-edge px-3 py-1.5 text-[12px] text-ink-faint hover:border-danger/60 hover:text-danger"
+            >
+              clear all
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-ink-dim">

@@ -76,6 +76,7 @@ const CATEGORY_ORDER = [
   'AD / Domain Privesc',
   'AD / Persistence',
   'AD / Trusts',
+  'AD / SCCM',
   'AD / Windows tooling',
   'AD / Entra ID',
   'AD / CVE',
