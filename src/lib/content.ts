@@ -70,6 +70,7 @@ const CATEGORY_ORDER = [
   'AD / Relay & Coercion',
   'AD / ADCS',
   'AD / Delegation',
+  'AD / ACL abuse',
   'AD / Lateral Movement',
   'AD / Domain Privesc',
   'AD / Persistence',
