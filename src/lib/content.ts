@@ -65,6 +65,7 @@ function prettyFromSlug(slug: string): string {
 }
 
 const CATEGORY_ORDER = [
+  'AD / Quick wins',
   'AD / Recon',
   'AD / Credentials',
   'AD / Relay & Coercion',

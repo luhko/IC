@@ -30,10 +30,15 @@ Vite + React + TypeScript, Tailwind, zustand, react-markdown, markmap, Fuse.js.
 Easiest — the launcher installs deps if needed, builds prod, and serves it:
 
 ```bash
-./launch.sh              # http://localhost:5173
-./launch.sh --dev        # dev server with hot reload
-PORT=8080 ./launch.sh    # different port
+./launch.sh                    # http://localhost:5173
+./launch.sh --dev              # dev server with hot reload
+PORT=8080 ./launch.sh          # different port
+HOST=0.0.0.0 ./launch.sh       # listen on all interfaces (reachable on the LAN)
+HOST=10.10.14.5 ./launch.sh    # bind a specific IP
 ```
+
+> `HOST=0.0.0.0` exposes the cheat sheet to your whole network — only do it on a
+> trusted / engagement network.
 
 Or with npm directly (production — minified static bundle):
 
