@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { navGroups, stats } from '../lib/content'
-import { docHref } from '../lib/nav'
+import { docHref, categoryLabel } from '../lib/nav'
 import { useUI } from '../store/ui'
 
 export function HomePage() {
@@ -60,7 +60,7 @@ export function HomePage() {
               className="rounded-lg border border-edge bg-bg-soft p-4"
             >
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-accent">
-                {g.name}
+                {categoryLabel(g.name)}
               </div>
               <ul className="space-y-1">
                 {g.docs.slice(0, 6).map((d) => (

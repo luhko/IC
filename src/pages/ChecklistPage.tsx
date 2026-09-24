@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { navGroups, attackPaths, searchable } from '../lib/content'
-import { docHref } from '../lib/nav'
+import { docHref, categoryLabel } from '../lib/nav'
 import { StatusControl, StatusDot } from '../components/Status'
 import { useChecklist, DEFAULT_ITEM } from '../store/checklist'
 import { useVars } from '../store/vars'
@@ -182,7 +182,7 @@ export function ChecklistPage() {
             return (
               <div key={g.name}>
                 <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-accent">
-                  {g.name}
+                  {categoryLabel(g.name)}
                 </div>
                 <div className="space-y-1.5">
                   {rows.map((d) => (

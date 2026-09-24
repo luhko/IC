@@ -53,8 +53,19 @@ function firstH1(body: string): string | undefined {
   return body.match(/^#\s+(.+)$/m)?.[1]?.trim()
 }
 
+function itemToStr(v: unknown): string {
+  if (v == null) return ''
+  // YAML parses a list item like "- Foo: bar" into an object {Foo: "bar"};
+  // reconstruct the intended "Foo: bar" string instead of "[object Object]".
+  if (typeof v === 'object')
+    return Object.entries(v as Record<string, unknown>)
+      .map(([k, val]) => (val == null ? k : `${k}: ${val}`))
+      .join(', ')
+  return String(v)
+}
+
 function asStrArr(v: unknown): string[] | undefined {
-  if (Array.isArray(v)) return v.map(String)
+  if (Array.isArray(v)) return v.map(itemToStr)
   if (typeof v === 'string') return [v]
   return undefined
 }

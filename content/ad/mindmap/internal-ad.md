@@ -4,83 +4,89 @@ title: Internal AD methodology
 
 # Internal AD
 
-## Recon (no creds)
-### Network
-- `nmap` sweep — 445/139/88/389/636/3268/5985/135
-- `netexec smb <range>` — hosts, signing, OS, domain
-- Identify DCs — 88/389 + `_ldap._tcp.dc._msdcs`
-### Anonymous / null
-- SMB null session — shares, users (RID cycling)
-- LDAP anonymous bind — naming context, sometimes objects
-- RPC — `rpcclient -U "" -N` enumdomusers
-### Poisoning
-- Responder — LLMNR / NBT-NS / mDNS → NetNTLM
-- mitm6 — DHCPv6 → WPAD → NTLM
-- Relay the captured auth (see Relay & Coercion)
-### Passwords
-- Guess: `Season+Year!`, company name, `Welcome1`
-- Spray low-and-slow, respect lockout (badPwdCount)
+## Recon
+### No creds
+- Network — nmap, `nxc smb/ldap` sweep, masscan → httpx → gowitness
+- Null / guest — SMB shares (`smbclient -N`), RID cycling, `rpcclient` enumdomusers
+- LDAP anon — namingContexts, sometimes objects
+- Poisoning — Responder (LLMNR/NBT-NS/mDNS), mitm6 (DHCPv6/WPAD)
+### With creds
+- BloodHound — bloodhound-python / `nxc --bloodhound` / SharpHound
+- `nxc` — --users --groups --pass-pol --gmsa --laps
+- ADCS — `certipy find -vulnerable`
+### Quick wins
+- GPP cpassword (SYSVOL), user description fields
+- Spray `Season+Year!`, Kerberoast, AS-REP roast
 
-## First creds
-### Validate
-- `netexec smb/ldap/winrm $dc_ip -u $user -p $password`
-- Note: (Pwn3d!) = local admin
-### Domain map
-- BloodHound — `bloodhound-python` / `nxc ... --bloodhound` / SharpHound
-- Find: shortest path to DA, kerberoastable, unconstrained, ACLs
-### Cheap wins
-- Kerberoasting — SPN accounts, crack offline
-- AS-REP roasting — DONT_REQ_PREAUTH
-- GPP cpassword in SYSVOL (MS14-025)
-- LAPS / gMSA read rights
-- Password in description / user attributes
-
-## Credential access
-### From a host (local admin)
-- LSASS dump — comsvcs / nanodump / procdump
-- SAM + LSA secrets — `nxc ... --sam --lsa`
-- DPAPI — masterkeys, creds, browser
+## Credentials
+### Roasting
+- Kerberoast (SPN accounts) → hashcat 13100
+- AS-REP roast (DONT_REQ_PREAUTH) → hashcat 18200
+- Targeted Kerberoast (WriteSPN edge)
 ### From the domain
-- DCSync — replicate hashes (needs DS-Replication)
-- NTDS.dit — `secretsdump`, vss, `nxc ... --ntds`
-### Tickets
-- Pass-the-Hash / OverPass-the-Hash → TGT
-- Pass-the-Ticket — inject .kirbi/.ccache
+- DCSync (DS-Replication rights) → `secretsdump -just-dc`
+- NTDS.dit → `nxc --ntds`
+### From a host (local admin)
+- LSASS — nanodump / lsassy / mimikatz sekurlsa
+- SAM + LSA — `nxc --sam --lsa`
+- DPAPI — masterkeys, browser, DonPAPI
+### Managed secrets
+- gMSA (ReadGMSAPassword) → gMSADumper / `nxc --gmsa`
+- Golden gMSA (KDS root key) — offline, forever
+- LAPS (ReadLAPSPassword) → `nxc -M laps`
+
+## Relay & coercion
+### Find
+- SMB signing off — `nxc --gen-relay-list`
+- LDAP channel binding — ldap-checker
+### Coerce
+- PetitPotam (EFSR), PrinterBug (RPRN), DFSCoerce (DFSNM)
+- WebDAV → HTTP (needed to reach LDAP)
+### Relay to…
+- SMB — dump-sam, exec, SOCKS + proxychains
+- LDAP — RBCD, Shadow Credentials, dump-laps/gmsa
+- ADCS ESC8 / ESC11 — DC cert → DCSync
 
 ## Privilege escalation
 ### ACL abuse (BloodHound edges)
-- GenericAll / GenericWrite / WriteDACL / WriteOwner
-- ForceChangePassword, AddMember, AddSelf
-- Shadow Credentials (msDS-KeyCredentialLink)
-- Targeted Kerberoast (write SPN)
-- Tools: bloodyAD, dacledit, owneredit, pyWhisker, targetedKerberoast
+- GenericAll / GenericWrite → Shadow Creds / targeted roast / RBCD
+- WriteDacl / WriteOwner → grant yourself DCSync
+- ForceChangePassword, AddMember / AddSelf
+- Tools — bloodyAD, dacledit, owneredit, pyWhisker
 ### ADCS (ESC1–ESC16)
-- Misconfigured templates → enroll as anyone
-- ESC8 / ESC11 — relay to CA
-- Certipy find / req
+- `certipy find -vulnerable`
+- ESC1 (SAN), ESC8/11 (relay), ESC9/10/16 (no SID ext)
 ### Delegation
-- Unconstrained — coerce + capture TGT
-- Constrained (KCD) — S4U2Proxy
-- RBCD — write msDS-AllowedToActOnBehalfOfOtherIdentity
+- Unconstrained — coerce a DC → capture TGT
+- Constrained (KCD) — S4U2Proxy, SPN swap
+- RBCD — write msDS-AllowedToActOnBehalfOf
+- KrbRelayUp — local → SYSTEM
+### Services
+- MSSQL — impersonation, linked servers, xp_cmdshell
+- SCCM — NAA / PXE creds, client-push relay → site takeover
 ### CVE
-- ZeroLogon, noPac, PetitPotam, PrintNightmare, KrbRelayUp…
+- ZeroLogon, noPac, PetitPotam + ESC8, PrintNightmare, Certifried
 
 ## Lateral movement
-- Exec — psexec / smbexec / wmiexec / atexec
+- Exec — psexec / smbexec / wmiexec / atexec / dcomexec
 - WinRM — evil-winrm
-- DCOM / MMC20
-- RDP — restricted admin, pass-the-hash
-- MSSQL — impersonation, linked servers, xp_cmdshell
-- SCCM — NAA/PXE creds, client-push relay, site takeover
+- Pass-the-Hash → OverPass (key → TGT) → Pass-the-Ticket
+- Convert .kirbi ↔ .ccache (ticketConverter)
 
 ## Domain dominance
-### Get to DA / Enterprise Admin
+### Reach DA / EA
 - DCSync the krbtgt
-- Abuse a Tier-0 path from BloodHound
+- Follow the BloodHound Tier-0 path
 ### Persistence
-- Golden / Silver / Diamond / Sapphire ticket
-- DSRM, AdminSDHolder, GPO, ACL backdoor
-- Skeleton key, certificate (THEFT/persistence)
+- Golden / Silver / Diamond / Sapphire tickets
+- DSRM, AdminSDHolder, writable GPO
+- ACL / DCSync backdoor, SID history
+
+## Trusts
+- Enumerate — direction, transitivity, SID filtering
+- Child → parent — SID history (EA RID 519), raiseChild
+- Cross-forest — foreign members, ACLs, trust key
+- Kerberoast / unconstrained across the trust
 
 ## Hybrid & Entra ID
 ### Recon
@@ -96,6 +102,5 @@ title: Internal AD methodology
 - Intune — cloud admin → SYSTEM on managed devices
 
 ## Post
-- Loot: shares, DBs, code, secrets
-- Trusts — parent/child, forest, SID history
+- Loot — shares (Snaffler), DBs, source, secrets
 - Cleanup + report — timeline, IOCs, remediation

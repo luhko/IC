@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { navGroups, attackPaths, mindmaps, stats } from '../lib/content'
-import { docHref, kindLabel } from '../lib/nav'
+import { docHref, kindLabel, categoryLabel } from '../lib/nav'
 import { useUI } from '../store/ui'
 import { StatusDot } from './Status'
 import type { Doc } from '../lib/types'
@@ -95,7 +95,7 @@ export function Sidebar() {
       {navGroups.map((group) => (
         <div key={group.name} className="px-2 py-1">
           <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-ink-faint">
-            {group.name}
+            {categoryLabel(group.name)}
           </div>
           {group.docs.map((doc) => (
             <DocLink key={doc.slug} doc={doc} />
@@ -106,7 +106,7 @@ export function Sidebar() {
       {attackPaths.length > 0 && (
         <div className="px-2 py-1">
           <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-ink-faint">
-            AD / Attack paths
+            Attack paths
           </div>
           {attackPaths.map((doc) => (
             <DocLink key={doc.slug} doc={doc} />

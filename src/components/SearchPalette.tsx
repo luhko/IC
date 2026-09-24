@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { search } from '../lib/search'
-import { docHref, kindLabel } from '../lib/nav'
+import { docHref, kindLabel, categoryLabel } from '../lib/nav'
 import { useUI } from '../store/ui'
 
 export function SearchPalette() {
@@ -87,7 +87,7 @@ export function SearchPalette() {
                     {r.title}
                   </span>
                   <span className="block truncate text-[11px] text-ink-faint">
-                    {r.category}
+                    {categoryLabel(r.category)}
                     {r.aka ? ` · ${r.aka}` : ''}
                   </span>
                 </span>

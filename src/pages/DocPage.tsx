@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 import { getDoc } from '../lib/content'
+import { categoryLabel } from '../lib/nav'
 import { Markdown } from '../components/Markdown'
 import { AttackPathView } from '../components/AttackPathView'
 import { StatusControl } from '../components/Status'
@@ -81,7 +82,7 @@ export function DocPage() {
     <div className="scroll-thin h-full overflow-y-auto">
       <article className="mx-auto max-w-3xl px-8 py-8">
         <div className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-accent">
-          {doc.category}
+          {categoryLabel(doc.category)}
         </div>
         <h1 className="text-2xl font-semibold text-ink">{doc.title}</h1>
         {doc.aka && (
