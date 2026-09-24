@@ -31,6 +31,16 @@ another service in real time. If SMB signing (or LDAP channel binding, or HTTP
 EPA) is not enforced, the relayed session inherits the victim's privileges on
 the target.
 
+> This page is the overview. For depth see **Relay matrix** (what protocol can be
+> relayed to what, and the signing/EPA/MIC gates), **WebDAV relay** (turn SMB
+> coercion into relayable HTTP), and the **ntlmrelayx cookbook** (SOCKS, exec,
+> LDAP/ADCS recipes).
+
+The single most important rule: **you cannot relay an authentication back to the
+host it came from** (reflection is patched), and the *source* protocol decides
+where you can go — SMB-sourced auth is signed and usually can't reach LDAP, while
+HTTP-sourced auth (WebDAV/WPAD) relays cleanly to LDAP and AD CS.
+
 ## Find where you can relay
 
 Signing is the gate. Enumerate targets whose SMB signing is **not required**:

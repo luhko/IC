@@ -21,3 +21,8 @@ variables:
   - { name: target_user, label: Target principal,       example: administrator,        group: Objective }
   - { name: target_computer, label: Target computer,    example: SRV02$,               group: Objective }
   - { name: spn,         label: Service Principal Name, example: cifs/srv01.corp.local, group: Objective }
+
+  - { name: ca,          label: CA name,                example: CORP-CA,              group: ADCS }
+  - { name: ca_host,     label: CA host (FQDN),         example: ca01.corp.local,      group: ADCS }
+  - { name: template,    label: Certificate template,   example: User,                 group: ADCS }
+  - { name: domain_sid,  label: Domain SID,             example: S-1-5-21-1004336348-1177238915-682003330, group: ADCS }
