@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { navGroups, attackPaths, mindmaps, stats } from '../lib/content'
 import { docHref, kindLabel } from '../lib/nav'
 import { useUI } from '../store/ui'
+import { StatusDot } from './Status'
 import type { Doc } from '../lib/types'
 
 function itemClass(active: boolean): string {
@@ -25,6 +26,26 @@ function KindTag({ kind }: { kind: Doc['kind'] }) {
     >
       {kindLabel(kind)}
     </span>
+  )
+}
+
+function DocLink({ doc }: { doc: Doc }) {
+  return (
+    <NavLink
+      to={docHref(doc)}
+      className={({ isActive }) =>
+        [
+          'flex items-center gap-1.5 rounded px-2 py-1 text-[13px] transition-colors',
+          isActive
+            ? 'bg-accent-soft text-accent'
+            : 'text-ink-dim hover:bg-white/5 hover:text-ink',
+        ].join(' ')
+      }
+    >
+      <StatusDot slug={doc.slug} />
+      <span className="min-w-0 flex-1 truncate">{doc.title}</span>
+      <KindTag kind={doc.kind} />
+    </NavLink>
   )
 }
 
@@ -55,6 +76,12 @@ export function Sidebar() {
         <NavLink to="/" end className={({ isActive }) => itemClass(isActive)}>
           Home
         </NavLink>
+        <NavLink
+          to="/checklist"
+          className={({ isActive }) => itemClass(isActive)}
+        >
+          Checklist
+        </NavLink>
         {mindmaps.length > 0 && (
           <NavLink
             to="/mindmap"
@@ -71,14 +98,7 @@ export function Sidebar() {
             {group.name}
           </div>
           {group.docs.map((doc) => (
-            <NavLink
-              key={doc.slug}
-              to={docHref(doc)}
-              className={({ isActive }) => itemClass(isActive)}
-            >
-              {doc.title}
-              <KindTag kind={doc.kind} />
-            </NavLink>
+            <DocLink key={doc.slug} doc={doc} />
           ))}
         </div>
       ))}
@@ -89,14 +109,7 @@ export function Sidebar() {
             AD / Attack paths
           </div>
           {attackPaths.map((doc) => (
-            <NavLink
-              key={doc.slug}
-              to={docHref(doc)}
-              className={({ isActive }) => itemClass(isActive)}
-            >
-              {doc.title}
-              <KindTag kind={doc.kind} />
-            </NavLink>
+            <DocLink key={doc.slug} doc={doc} />
           ))}
         </div>
       )}

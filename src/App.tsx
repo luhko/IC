@@ -6,6 +6,7 @@ import { SearchPalette } from './components/SearchPalette'
 import { HomePage } from './pages/HomePage'
 import { DocPage } from './pages/DocPage'
 import { MindmapPage } from './pages/MindmapPage'
+import { ChecklistPage } from './pages/ChecklistPage'
 import { useUI } from './store/ui'
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/n/*" element={<DocPage />} />
           <Route path="/mindmap" element={<MindmapPage />} />
+          <Route path="/checklist" element={<ChecklistPage />} />
         </Routes>
       </main>
       <ContextBar />

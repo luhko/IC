@@ -74,6 +74,7 @@ const CATEGORY_ORDER = [
   'AD / Lateral Movement',
   'AD / Domain Privesc',
   'AD / Persistence',
+  'AD / Windows tooling',
   'AD / CVE',
 ]
 function catWeight(c: string): number {

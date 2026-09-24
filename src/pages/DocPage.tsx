@@ -2,6 +2,8 @@ import { useParams, Link } from 'react-router-dom'
 import { getDoc } from '../lib/content'
 import { Markdown } from '../components/Markdown'
 import { AttackPathView } from '../components/AttackPathView'
+import { StatusControl } from '../components/Status'
+import { useChecklist } from '../store/checklist'
 import type { Doc } from '../lib/types'
 
 function sevClass(sev?: string): string {
@@ -93,6 +95,10 @@ export function DocPage() {
           <CveMeta doc={doc} />
         </div>
 
+        <div className="mb-6 rounded-lg border border-edge bg-bg-soft px-4 py-3">
+          <StatusControl slug={doc.slug} />
+        </div>
+
         {(doc.prerequisites || doc.tools || doc.affected) && (
           <div className="prose-ic mb-6 grid gap-4 rounded-lg border border-edge bg-bg-soft p-4 sm:grid-cols-2">
             <MetaList title="Prerequisites" items={doc.prerequisites} />
@@ -141,7 +147,29 @@ export function DocPage() {
             </ul>
           </div>
         )}
+
+        <NoteBox slug={doc.slug} />
       </article>
+    </div>
+  )
+}
+
+function NoteBox({ slug }: { slug: string }) {
+  const note = useChecklist((s) => s.items[slug]?.note ?? '')
+  const setNote = useChecklist((s) => s.setNote)
+  return (
+    <div className="mt-8">
+      <h4 className="mb-2 text-base font-semibold uppercase tracking-wide text-ink-dim">
+        Notes
+      </h4>
+      <textarea
+        value={note}
+        onChange={(e) => setNote(slug, e.target.value)}
+        placeholder="Your engagement notes for this technique (saved locally in your browser)…"
+        rows={4}
+        spellCheck={false}
+        className="scroll-thin w-full resize-y rounded-lg border border-edge bg-bg-soft px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-faint/70 focus:border-accent"
+      />
     </div>
   )
 }
