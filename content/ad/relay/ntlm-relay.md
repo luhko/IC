@@ -33,8 +33,8 @@ the target.
 
 > This page is the overview. For depth see **Relay matrix** (what protocol can be
 > relayed to what, and the signing/EPA/MIC gates), **WebDAV relay** (turn SMB
-> coercion into relayable HTTP), and the **ntlmrelayx cookbook** (SOCKS, exec,
-> LDAP/ADCS recipes).
+> coercion into relayable HTTP), **mitm6** (IPv6/WPAD → relay to LDAP), and the
+> **ntlmrelayx cookbook** (SOCKS, exec, LDAP/ADCS recipes).
 
 The single most important rule: **you cannot relay an authentication back to the
 host it came from** (reflection is patched), and the *source* protocol decides
